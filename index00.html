@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elite Playmakers FC – Live Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;1,900&family=Barlow:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script type="module">import{removeBackground}from'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm';window.removeBg=removeBackground;</script>
+<style>
+:root{--ink:#111;--gold:#c9a227;--bg:#efede8;--ln:#d8d4ca}
+*{box-sizing:border-box}body{margin:0;font:500 16px/1.4 Barlow,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--ink);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:4px solid var(--gold);gap:8px}
+header b{font:italic 900 20px 'Barlow Condensed',Impact,sans-serif;display:flex;align-items:center;gap:8px}header img{height:34px}
+nav button{background:none;border:0;color:#bbb;font:inherit;padding:6px 8px;cursor:pointer}nav .on{color:var(--gold);font-weight:700}
+main{max-width:760px;margin:0 auto;padding:14px}.card{background:#fff;border:1px solid var(--ln);padding:12px;margin-bottom:12px}
+h3{margin:0 0 8px;font:italic 900 20px 'Barlow Condensed',Impact,sans-serif}label{display:block;font-size:13px;font-weight:700;margin:8px 0 3px}
+input,select{width:100%;padding:10px;border:1px solid #bbb;font:inherit;background:#fff;border-radius:0}
+button.p,.btn{background:var(--ink);color:#fff;border:0;padding:10px 13px;font:700 15px Barlow,sans-serif;cursor:pointer;display:inline-block}
+.g{background:var(--gold)!important;color:#111!important}.x{background:none;border:1px solid #bbb;padding:5px 9px;cursor:pointer}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row{display:flex;gap:8px;align-items:center;margin-bottom:6px;justify-content:space-between}
+.mc{cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-left:5px solid var(--gold)}.mc b{font:italic 900 24px 'Barlow Condensed',Impact,sans-serif}
+.note{font-size:13px;color:#555}.hide{display:none!important}.tabs{display:flex;gap:6px;margin-bottom:10px}.tabs button{flex:1}
+canvas{width:100%;height:auto;display:block;border:1px solid var(--ln)}img.th{width:36px;height:36px;object-fit:cover;background:#ddd}
+#modal{position:fixed;inset:0;background:#000c;overflow:auto;padding:12px;z-index:5}#modal .card{max-width:520px;margin:0 auto}#modal img.sc{width:100%}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;opacity:0;transition:.2s;pointer-events:none;z-index:9}#toast.show{opacity:1}#toast.err{background:#b00020}
+</style></head><body>
+<header><b><img id="hLogo" class="hide"><span id="hName">ELITE PLAYMAKERS FC</span></b><nav><button id="n1" class="on" onclick="view(1)">Results</button><button id="n2" onclick="view(2)">Admin</button></nav></header>
+<main>
+<section id="v1">
+  <div class="card"><input id="q" placeholder="Search team…" oninput="pub()"><div class="g2" style="margin-top:8px"><select id="ft" onchange="pub()"></select><select id="fs" onchange="pub()"><option value="">All status</option><option value="completed">Completed</option><option value="upcoming">Upcoming</option></select></div></div>
+  <div id="list"></div>
+</section>
+<section id="v2" class="hide">
+  <div id="login" class="card"><h3>Admin login</h3><input id="em" type="email" placeholder="Email"><label>Password</label><input id="pw" type="password">
+    <div class="acts"><button class="p g" onclick="login()">Log in</button><button class="p" onclick="signup()">Request access</button></div>
+    <div class="acts"><button class="p" style="width:100%;background:#fff;color:#111;border:1px solid #bbb" onclick="google()">Continue with Google (Gmail)</button></div><p class="note" id="lmsg"></p></div>
+  <div id="dash" class="hide">
+    <div class="tabs"><button class="p g" onclick="atab('am')">Matches</button><button class="p" onclick="atab('at')">Teams &amp; players</button><button class="p hide" id="bM" onclick="atab('ax')">Master</button><button class="p" onclick="out()">Log out</button></div>
+    <div id="am"><div class="card"><h3 id="mTitle">New match</h3>
+      <label>Tournament</label><select id="mT"></select><div class="acts" style="margin-top:4px"><input id="nt" placeholder="New tournament name" style="flex:1"><button class="p" onclick="addTour()">Add</button></div>
+      <div class="g2"><div><label>Match no.</label><input id="mNo" type="number"></div><div><label>Date</label><input id="mDate" type="date"></div></div>
+      <label>Category</label><input id="mCat" placeholder="e.g. Co-op 2 vs 2">
+      <label>Team A</label><select id="mA" onchange="pick('A')"></select><div class="g2"><select id="mA1"></select><select id="mA2"></select></div>
+      <label>Team B</label><select id="mB" onchange="pick('B')"></select><div class="g2"><select id="mB1"></select><select id="mB2"></select></div>
+      <div class="g2"><div><label>Score A</label><input id="sA" type="number" inputmode="numeric" value="0"></div><div><label>Score B</label><input id="sB" type="number" inputmode="numeric" value="0"></div></div>
+      <label>Status</label><select id="mSt"><option value="completed">Completed</option><option value="upcoming">Upcoming</option></select>
+      <div class="acts"><button class="p" onclick="prev()">Preview scorecard</button><button class="p" onclick="saveM(false)">Save draft</button><button class="p g" onclick="saveM(true)">Generate &amp; publish</button><button class="p" onclick="resetForm()">New</button></div></div>
+      <canvas id="cv" width="2160" height="2700"></canvas>
+      <div class="card" style="margin-top:12px"><h3>All matches</h3><div id="aList"></div></div></div>
+    <div id="at" class="hide"><div class="card"><h3>Add team</h3><div class="g2"><input id="tc" placeholder="Team ID (T001)"><input id="tn" placeholder="Team name"></div><div class="acts"><button class="p g" onclick="addTeam()">Add team</button></div></div>
+      <div class="card"><h3>Add player</h3><input id="pn" placeholder="Player name"><div class="g2"><input id="pc" placeholder="Player ID"><input id="pk" placeholder="Nickname (optional)"></div>
+      <label>Team</label><select id="pt"></select><label>Photo</label><input id="pf" type="file" accept="image/*"><div class="acts"><button class="p g" onclick="addPlayer()">Add player</button></div></div>
+      <div class="card"><h3>Teams &amp; players</h3><input id="sq" placeholder="Search…" oninput="tList()"><div id="tList"></div></div></div>
+    <div id="ax" class="hide"><div class="card"><h3>Club branding</h3><label>Club name</label><input id="cn"><label>Logo</label><input id="cl" type="file" accept="image/*"><div class="acts"><button class="p g" onclick="saveClub()">Save branding</button></div></div>
+      <div class="card"><h3>Admins</h3><div id="admins"></div><p class="note">New admins tap “Request access”; activate them here. Password resets: Supabase dashboard &gt; Authentication.</p></div>
+      <div class="card"><h3>Activity log</h3><div id="log" class="note"></div></div></div>
+  </div>
+</section>
+</main>
+<div id="modal" class="hide" onclick="if(event.target==this)closeM()"><div class="card" id="mb"></div></div>
+<div id="toast"></div>
+<script>
+const SB_URL='https://qlblcwjtisovhxwsbodi.supabase.co',SB_KEY='sb_publishable_JQA_nx3rChXVZnkBSCvoIQ_Dwfy2H5r'; // public anon key is safe: RLS protects data
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S={club:{name:'ELITE PLAYMAKERS FC',logo:''},T:[],Tm:[],P:[],M:[],me:null,cur:null};
+const toast=(m,e)=>{const t=$('#toast');t.textContent=m;t.className=e?'err show':'show';setTimeout(()=>t.className='',3200)};
+const tn=id=>(S.Tm.find(t=>t.id==id)||{}).name||'?',pn=id=>(S.P.find(p=>p.id==id)||{}).name||'',pu=id=>(S.P.find(p=>p.id==id)||{}).photo_url||'';
+const win=m=>m.score_a>m.score_b?tn(m.team_a):m.score_b>m.score_a?tn(m.team_b):'Draw';
+const opts=(a,f=x=>x.name,e='')=>(e?`<option value="">${e}</option>`:'')+a.map(x=>`<option value="${x.id}">${E(f(x))}</option>`).join('');
+const view=n=>{$('#v1').classList.toggle('hide',n!=1);$('#v2').classList.toggle('hide',n!=2);$('#n1').classList.toggle('on',n==1);$('#n2').classList.toggle('on',n==2)};
+const atab=i=>['am','at','ax'].forEach(k=>$('#'+k).classList.toggle('hide',k!=i));
+const log=(a,d)=>sb.from('activity_log').insert({action:a,detail:d});
+
+async function load(){
+  const r=await Promise.all([sb.from('settings').select('*'),sb.from('tournaments').select('*').order('created_at',{ascending:false}),sb.from('teams').select('*').order('name'),sb.from('players').select('*').order('name'),sb.from('matches').select('*').order('match_date',{ascending:false,nullsFirst:false})]);
+  if(r.some(x=>x.error))return toast('Could not load data. Check your Supabase config.',1);
+  r[0].data.forEach(s=>{if(s.key=='club_name')S.club.name=s.value;if(s.key=='club_logo')S.club.logo=s.value});
+  [S.T,S.Tm,S.P,S.M]=[r[1].data,r[2].data,r[3].data,r[4].data];
+  $('#hName').textContent=S.club.name;if(S.club.logo){$('#hLogo').src=S.club.logo;$('#hLogo').classList.remove('hide')}
+  const ft=$('#ft').value;$('#ft').innerHTML=opts(S.T,t=>t.name,'All tournaments');$('#ft').value=ft;
+  pub();if(S.me)adminFill();
+}
+function pub(){
+  const q=$('#q').value.toLowerCase(),t=$('#ft').value,s=$('#fs').value;
+  const L=S.M.filter(m=>m.published&&(!t||m.tournament_id==t)&&(!s||m.status==s)&&(tn(m.team_a)+tn(m.team_b)).toLowerCase().includes(q));
+  $('#list').innerHTML=L.map(m=>`<div class="card mc" onclick="openM('${m.id}')"><div><div class="note">${E((S.T.find(x=>x.id==m.tournament_id)||{}).name)} ${m.match_date||''}</div><b>${E(tn(m.team_a))} ${m.status=='completed'?m.score_a+' - '+m.score_b:'vs'} ${E(tn(m.team_b))}</b>
+  <div class="note">${m.status=='completed'?'Winner: '+E(win(m)):'Upcoming'}</div></div><span>›</span></div>`).join('')||'<p class="note">No results published yet.</p>';
+}
+function openM(id){
+  const m=S.M.find(x=>x.id==id);if(!m)return;history.replaceState(null,'','#m='+id);
+  $('#mb').innerHTML=`<h3>${E(tn(m.team_a))} vs ${E(tn(m.team_b))}</h3>${m.scorecard_url?`<img class="sc" src="${m.scorecard_url}">`:''}
+  <p>${E(pn(m.player_a1))} &amp; ${E(pn(m.player_a2))}<br>${E(pn(m.player_b1))} &amp; ${E(pn(m.player_b2))}</p><p class="note">${E((S.T.find(x=>x.id==m.tournament_id)||{}).name)} · Match ${m.match_no||'-'} · ${m.match_date||''}</p>
+  <div class="acts"><button class="p g" onclick="dlU('${m.scorecard_url}')">Download</button><button class="p" onclick="navigator.clipboard.writeText(location.href).then(()=>toast('Link copied'))">Copy link</button><button class="p" onclick="closeM()">Close</button></div>`;
+  $('#modal').classList.remove('hide');
+}
+const closeM=()=>{$('#modal').classList.add('hide');history.replaceState(null,'',location.pathname)};
+async function dlU(u){const b=await (await fetch(u)).blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='epf-scorecard.png';a.click()}
+
+/* ---------- Auth ---------- */
+async function login(){const{error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});if(error)toast(error.message,1)}
+async function signup(){const{error}=await sb.auth.signUp({email:$('#em').value,password:$('#pw').value});error?toast(error.message,1):toast('Requested. Ask the Master Admin to activate you.')}
+const out=()=>sb.auth.signOut();
+const google=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+sb.auth.onAuthStateChange((_,s)=>setTimeout(async()=>{
+  S.me=null;if(s){const{data}=await sb.from('profiles').select('*').eq('id',s.user.id).single();S.me=data}
+  const ok=S.me&&S.me.active;$('#login').classList.toggle('hide',!!ok);$('#dash').classList.toggle('hide',!ok);
+  $('#lmsg').textContent=s&&!ok?'Account not active yet. Ask the Master Admin.':'';$('#bM').classList.toggle('hide',!(ok&&S.me.role=='master'));
+  await load();
+},0));
+
+/* ---------- Admin ---------- */
+function adminFill(){
+  const v=['#mT','#mA','#mB','#pt'].map(i=>$(i).value);
+  $('#mT').innerHTML=opts(S.T);$('#mA').innerHTML=opts(S.Tm,t=>t.name,'Select team');$('#mB').innerHTML=opts(S.Tm,t=>t.name,'Select team');$('#pt').innerHTML=opts(S.Tm,t=>t.name,'No team');
+  ['#mT','#mA','#mB','#pt'].forEach((i,k)=>{if(v[k])$(i).value=v[k]});pick('A',1);pick('B',1);tList();
+  $('#cn').value=S.club.name;
+  $('#aList').innerHTML=S.M.map(m=>`<div class="row"><span>${E(tn(m.team_a))} ${m.score_a}-${m.score_b} ${E(tn(m.team_b))} ${m.published?'✓':'(draft)'}</span><span><button class="x" onclick="editM('${m.id}')">Edit</button> <button class="x" onclick="delM('${m.id}')">✕</button></span></div>`).join('')||'<p class="note">No matches.</p>';
+  if(S.me.role=='master')masterFill();
+}
+function pick(s,keep){
+  const t=$('#m'+s).value,own=S.P.filter(p=>p.team_id==t),rest=S.P.filter(p=>p.team_id!=t);
+  [1,2].forEach(i=>{const el=$('#m'+s+i),old=el.value;el.innerHTML=opts(own.concat(rest),p=>p.name+(p.team_id==t?'':' (other team)'),'—');el.value=keep&&old?old:(own[i-1]||{}).id||''});
+}
+async function addTour(){const n=$('#nt').value.trim();if(!n)return;const{error}=await sb.from('tournaments').insert({name:n});if(error)return toast(error.message,1);$('#nt').value='';log('tournament',n);toast('Tournament added');load()}
+async function addTeam(){const n=$('#tn').value.trim();if(!n)return toast('Enter team name',1);const{error}=await sb.from('teams').insert({name:n,code:$('#tc').value.trim()||null});if(error)return toast(error.message,1);$('#tn').value=$('#tc').value='';log('team',n);toast('Team added');load()}
+function shrink(f,w,t='image/jpeg'){return new Promise(r=>{const i=new Image();i.onload=()=>{const s=Math.min(1,w/i.width),c=document.createElement('canvas');c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(r,t,.8)};i.src=URL.createObjectURL(f)})}
+async function cutout(f){ // removes the background in the browser (free, runs once at upload)
+  const png=await shrink(f,700,'image/png');
+  try{toast('Removing background… first time downloads the AI model (~40 MB)');return await window.removeBg(png,{output:{format:'image/png'}})}
+  catch(e){toast('Background removal failed, using original photo',1);return png}
+}
+async function upl(blob,path){const{error}=await sb.storage.from('epf').upload(path,blob,{upsert:true,contentType:blob.type});if(error)throw error;return sb.storage.from('epf').getPublicUrl(path).data.publicUrl+'?v='+Date.now()}
+async function addPlayer(){
+  const n=$('#pn').value.trim();if(!n)return toast('Enter player name',1);
+  try{const id=crypto.randomUUID(),f=$('#pf').files[0],url=f?await upl(await cutout(f),'players/'+id+'.png'):null;
+  const{error}=await sb.from('players').insert({id,name:n,code:$('#pc').value.trim()||null,nickname:$('#pk').value||null,team_id:$('#pt').value||null,photo_url:url});if(error)throw error;
+  $('#pn').value=$('#pc').value=$('#pk').value=$('#pf').value='';log('player',n);toast('Player added');load()}catch(e){toast(e.message,1)}
+}
+function tList(){
+  const q=($('#sq').value||'').toLowerCase();
+  $('#tList').innerHTML=S.Tm.filter(t=>t.name.toLowerCase().includes(q)||S.P.some(p=>p.team_id==t.id&&p.name.toLowerCase().includes(q))).map(t=>`<div class="card"><div class="row"><b>${E(t.name)} <span class="note">${E(t.code||'')}</span></b><button class="x" onclick="delRow('teams','${t.id}')">✕</button></div>
+  ${S.P.filter(p=>p.team_id==t.id).map(p=>`<div class="row"><span><img class="th" src="${p.photo_url||'data:,'}"> ${E(p.name)}</span><span><label class="x" style="display:inline;margin:0">Photo<input type="file" accept="image/*" hidden onchange="repPhoto('${p.id}',this)"></label> <select onchange="mv('${p.id}',this.value)" style="width:auto">${opts(S.Tm,x=>x.name,'Move…')}</select> <button class="x" onclick="delRow('players','${p.id}')">✕</button></span></div>`).join('')}</div>`).join('');
+}
+async function repPhoto(id,el){try{const u=await upl(await cutout(el.files[0]),'players/'+id+'.png');await sb.from('players').update({photo_url:u}).eq('id',id);toast('Photo replaced');load()}catch(e){toast(e.message,1)}}
+async function mv(id,t){if(!t)return;await sb.from('players').update({team_id:t}).eq('id',id);log('transfer',id);toast('Player moved');load()}
+async function delRow(tb,id){if(!confirm('Delete permanently?'))return;const{error}=await sb.from(tb).delete().eq('id',id);error?toast(error.message,1):(log('delete '+tb,id),toast('Deleted'),load())}
+
+function form(){
+  const g=i=>$(i).value;
+  return{tournament_id:g('#mT')||null,match_no:+g('#mNo')||null,match_date:g('#mDate')||null,category:g('#mCat'),team_a:g('#mA')||null,team_b:g('#mB')||null,player_a1:g('#mA1')||null,player_a2:g('#mA2')||null,player_b1:g('#mB1')||null,player_b2:g('#mB2')||null,score_a:+g('#sA')||0,score_b:+g('#sB')||0,status:g('#mSt')};
+}
+const card=f=>({club:S.club.name,logo:S.club.logo,t:(S.T.find(x=>x.id==f.tournament_id)||{}).name||'TOURNAMENT',A:{n:tn(f.team_a),ph:[pu(f.player_a1),pu(f.player_a2)]},B:{n:tn(f.team_b),ph:[pu(f.player_b1),pu(f.player_b2)]},a:f.score_a,b:f.score_b});
+async function prev(){const f=form();if(!f.team_a||!f.team_b||f.team_a==f.team_b)return toast('Choose two different teams',1);await draw($('#cv'),card(f));$('#cv').scrollIntoView({behavior:'smooth'})}
+async function saveM(publish){
+  const f=form();if(!f.tournament_id||!f.team_a||!f.team_b||f.team_a==f.team_b)return toast('Choose a tournament and two different teams',1);
+  try{const id=S.cur||crypto.randomUUID();f.published=publish;
+    if(publish){const cv=$('#cv');await draw(cv,card(f));const b=await new Promise(r=>cv.toBlob(r,'image/png'));f.scorecard_url=await upl(b,'cards/'+id+'.png')}
+    const{error}=S.cur?await sb.from('matches').update(f).eq('id',id):await sb.from('matches').insert({...f,id});if(error)throw error;
+    log(publish?'publish match':'save match',tn(f.team_a)+' vs '+tn(f.team_b));toast(publish?'Published':'Saved');S.cur=id;load()}catch(e){toast(e.message,1)}
+}
+function editM(id){const m=S.M.find(x=>x.id==id);S.cur=id;$('#mTitle').textContent='Edit match';
+  $('#mT').value=m.tournament_id;$('#mNo').value=m.match_no||'';$('#mDate').value=m.match_date||'';$('#mCat').value=m.category||'';$('#mA').value=m.team_a;$('#mB').value=m.team_b;pick('A');pick('B');
+  $('#mA1').value=m.player_a1||'';$('#mA2').value=m.player_a2||'';$('#mB1').value=m.player_b1||'';$('#mB2').value=m.player_b2||'';$('#sA').value=m.score_a;$('#sB').value=m.score_b;$('#mSt').value=m.status;scrollTo(0,0)}
+function resetForm(){S.cur=null;$('#mTitle').textContent='New match';['#mNo','#mDate','#mCat'].forEach(i=>$(i).value='');$('#sA').value=$('#sB').value=0}
+async function delM(id){if(!confirm('Delete this match?'))return;const{error}=await sb.from('matches').delete().eq('id',id);error?toast(error.message,1):(log('delete match',id),toast('Deleted'),load())}
+
+/* ---------- Master ---------- */
+async function masterFill(){
+  const{data}=await sb.from('profiles').select('*').order('created_at');
+  $('#admins').innerHTML=(data||[]).map(p=>`<div class="row"><span>${E(p.email)}<br><span class="note">${p.role}</span></span><span><select onchange="setP('${p.id}',{role:this.value})" style="width:auto"><option ${p.role=='admin'?'selected':''}>admin</option><option ${p.role=='master'?'selected':''}>master</option></select> <button class="x ${p.active?'':'g'}" onclick="setP('${p.id}',{active:${!p.active}})">${p.active?'Revoke':'Activate'}</button></span></div>`).join('');
+  const l=await sb.from('activity_log').select('*').order('created_at',{ascending:false}).limit(40);
+  $('#log').innerHTML=(l.data||[]).map(x=>`${new Date(x.created_at).toLocaleString()} · ${E(x.action)} · ${E(x.detail)}`).join('<br>');
+}
+async function setP(id,v){const{error}=await sb.from('profiles').update(v).eq('id',id);error?toast(error.message,1):(log('admin update',id),toast('Updated'),masterFill())}
+async function saveClub(){try{const rows=[{key:'club_name',value:$('#cn').value}],f=$('#cl').files[0];if(f){const c=await upl(await shrink(f,400),'brand/logo.jpg');rows.push({key:'club_logo',value:c})}
+  const{error}=await sb.from('settings').upsert(rows);if(error)throw error;toast('Branding saved');load()}catch(e){toast(e.message,1)}}
+
+/* ---------- Scorecard engine (canvas, free, in-browser) ---------- */
+const F='"Barlow Condensed","Arial Narrow",Impact,sans-serif';
+const li=s=>new Promise(r=>{if(!s)return r(null);const i=new Image();i.crossOrigin='anonymous';i.onload=()=>r(i);i.onerror=()=>r(null);i.src=s});
+function sp(x,t,cx,y,g){let w=0;const m=[...t].map(c=>{const k=x.measureText(c).width;w+=k;return k});w+=g*(t.length-1);let p=cx-w/2;x.textAlign='left';[...t].forEach((c,i)=>{x.fillText(c,p,y);p+=m[i]+g})}
+function fit(x,t,f,max,s,g=0){do{x.font=f(s);s-=2}while(s>20&&x.measureText(t).width+g*t.length>max);return s+2}
+function corner(x){x.fillStyle='#111';x.beginPath();x.moveTo(0,0);x.lineTo(240,0);x.lineTo(0,175);x.fill();x.strokeStyle='#c9a227';x.lineWidth=9;x.beginPath();x.moveTo(262,0);x.lineTo(0,192);x.stroke()}
+async function photos(x,srcs,bx,by,bw,bh){
+  const k=2,o=document.createElement('canvas');o.width=bw*k;o.height=bh*k;const q=o.getContext('2d'),sw=bw*.58*k;
+  for(let i=0;i<2;i++){const im=await li(srcs[i]);if(!im)continue;const s=Math.min(o.height/im.height,sw*1.05/im.width),cx=(i?.7:.3)*bw*k;
+    q.drawImage(im,cx-im.width*s/2,o.height-im.height*s,im.width*s,im.height*s)}
+  try{const d=q.getImageData(0,0,o.width,o.height),p=d.data;for(let i=0;i<p.length;i+=4){const v=.3*p[i]+.59*p[i+1]+.11*p[i+2];p[i]=p[i+1]=p[i+2]=v}q.putImageData(d,0,0)}catch(e){}
+  q.globalCompositeOperation='destination-out';const g=q.createLinearGradient(0,o.height*.6,0,o.height);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'#000');q.fillStyle=g;q.fillRect(0,0,o.width,o.height);
+  x.drawImage(o,bx,by,bw,bh);
+}
+async function draw(cv,d){
+  try{await Promise.all([document.fonts.load('italic 900 100px "Barlow Condensed"'),document.fonts.load('600 40px "Barlow Condensed"')])}catch(e){}
+  const x=cv.getContext('2d'),G='#c9a227',K='#111';x.setTransform(2,0,0,2,0,0);x.fillStyle='#efede8';x.fillRect(0,0,1080,1350);
+  corner(x);x.save();x.translate(1080,1350);x.rotate(Math.PI);corner(x);x.restore();
+  const lg=await li(d.logo);
+  if(lg){const s=Math.min(140/lg.width,140/lg.height);x.drawImage(lg,540-lg.width*s/2,55,lg.width*s,lg.height*s)}
+  else{x.fillStyle=K;x.beginPath();x.arc(540,125,64,0,7);x.fill();x.strokeStyle=G;x.lineWidth=5;x.stroke();x.fillStyle=G;x.font=`italic 900 52px ${F}`;x.textAlign='center';x.fillText((d.club||'C').split(' ').map(w=>w[0]).join('').slice(0,3),540,143)}
+  x.fillStyle=K;x.font=`600 46px ${F}`;sp(x,(d.club||'').toUpperCase(),540,262,12);x.fillRect(130,290,820,2);
+  const T=d.t.toUpperCase();x.font=`600 ${fit(x,T,s=>`600 ${s}px ${F}`,900,40,8)}px ${F}`;sp(x,T,540,350,8);
+  x.font=`italic 900 140px ${F}`;const w1=x.measureText('MATCH').width,w2=x.measureText('RESULT').width,st=540-(w1+w2+30)/2;x.textAlign='left';x.fillStyle=K;x.fillText('MATCH',st,480);x.fillStyle=G;x.fillText('RESULT',st+w1+30,480);
+  await photos(x,d.A.ph,0,545,520,430);await photos(x,d.B.ph,560,545,520,430);
+  x.fillStyle=G;x.fillRect(539,575,3,95);x.fillRect(539,890,3,95);x.fillRect(521,775,38,10);
+  x.fillStyle=K;x.textAlign='center';x.font=`italic 900 200px ${F}`;x.fillText(d.a,455,850);x.fillText(d.b,625,850);
+  x.fillStyle=G;x.fillRect(70,992,380,3);x.fillRect(650,992,360,3);x.fillStyle=K;
+  [[d.A.n,260],[d.B.n,830]].forEach(([n,c])=>{n=n.toUpperCase();x.font=`600 ${fit(x,n,s=>`600 ${s}px ${F}`,420,46,8)}px ${F}`;sp(x,n,c,1045,8)});
+  const dr=d.a==d.b,lab=dr?'RESULT':'WINNER',wn=dr?'DRAW':(d.a>d.b?d.A.n:d.B.n).toUpperCase();
+  x.fillStyle=K;x.font=`600 38px ${F}`;sp(x,lab,540,1140,16);const lw=x.measureText(lab).width+16*lab.length;
+  x.fillStyle=G;x.fillRect(90,1128,540-lw/2-115,3);x.fillRect(540+lw/2+25,1128,425-lw/2-25,3);
+  x.fillStyle=K;x.font=`italic 900 ${fit(x,wn,s=>`italic 900 ${s}px ${F}`,840,120)}px ${F}`;x.textAlign='center';x.fillText(wn,540,1245);
+  x.font=`600 30px ${F}`;sp(x,T,540,1325,10);const fw=x.measureText(T).width+10*T.length;x.fillStyle=K;x.fillRect(100,1316,415-fw/2,2);x.fillRect(565+fw/2,1316,415-fw/2,2);
+}
+sb.channel('m').on('postgres_changes',{event:'*',schema:'public',table:'matches'},()=>load()).subscribe();
+load().then(()=>{const h=location.hash.match(/m=(.+)/);if(h)openM(h[1])});
+</script></body></html>
